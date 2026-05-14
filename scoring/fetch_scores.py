@@ -27,5 +27,5 @@ TEAMS = {
     'JB':           ['Xander Schauffele', 'Tyrrell Hatton', 'Robert MacIntyre', 'Joaquin Niemann', 'Thomas Detry', 'Nick Taylor'],
     'Nick':         ['Ludvig Aberg', 'Hideki Matsuyama', 'Corey Conners', 'Sepp Straka', 'Keegan Bradley', 'Sahith Theegala'],
     'Ian':          ['Jon Rahm', 'Brooks Koepka', 'Jason Day', 'Akshay Bhatia', 'Nicolai Hojgaard', 'Rasmus Hojgaard'],
-    'Ben':          ['Collin Morikawa', 'Justin Rose', 'Maverick McNealy', 'Jake Knapp', 'Ryan Gerard', 'Michael Thorbjornsen'],
+    'Ben':          ['Collin Morikawa', 'Justin Rose', 'Maverick McNealy', 'Kurt Kitayama', 'Ryan Gerard', 'Michael Thorbjornsen'],
 
