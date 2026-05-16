@@ -917,6 +917,9 @@ const TEAMS = {
 // ESPN event name keyword for validation (prevents loading wrong tournament data)
 const ESPN_EVENT_KEYWORD = 'pga championship'; // 'masters', 'pga championship', 'u.s. open', 'open championship'
 
+// Cut size after Round 2 — Masters: top 50+ties, PGA: top 70+ties, US Open: top 60+ties, Open: top 70+ties
+const CUT_SIZE = 70;
+
 // Set to true AFTER the tournament ends to freeze the dashboard
 const ARCHIVE_CONFIG = { enabled: false, date: null, champion: null, championScore: null, poolWinner: null, poolWinnerPts: null, runnerUp: null, runnerUpPts: null };
 // Example when archiving:
@@ -1049,23 +1052,23 @@ function determineCutLine(competitors, currentPeriod) {
     const r2Scores = competitors.map(c => ({
       id: c.id, order: c.order, r2: getR2Score(c)
     })).filter(c => c.r2 !== null).sort((a, b) => a.r2 - b.r2);
-    if (r2Scores.length < 50) return { cutScore: null, cutPos: 50, cutPlayerIds: new Set() };
-    const p50 = r2Scores[49].r2;
+    if (r2Scores.length < CUT_SIZE) return { cutScore: null, cutPos: CUT_SIZE, cutPlayerIds: new Set() };
+    const cutLineScore = r2Scores[CUT_SIZE - 1].r2;
     // Include all ties at the cut score
     const madeCut = new Set();
     for (const c of r2Scores) {
-      if (c.r2 <= p50) madeCut.add(c.id);
+      if (c.r2 <= cutLineScore) madeCut.add(c.id);
     }
-    return { cutScore: p50, cutPos: madeCut.size, cutPlayerIds: madeCut };
+    return { cutScore: cutLineScore, cutPos: madeCut.size, cutPlayerIds: madeCut };
   } else {
     // Before cut — use current leaderboard position as projection
     const sorted = [...competitors].sort((a,b) => (a.order||999)-(b.order||999));
-    if (sorted.length < 50) return { cutScore: null, cutPos: 50, cutPlayerIds: new Set() };
-    const p50Score = parseScore(sorted[49].score);
-    let cutPos = 50;
+    if (sorted.length < CUT_SIZE) return { cutScore: null, cutPos: CUT_SIZE, cutPlayerIds: new Set() };
+    const cutLineScore = parseScore(sorted[CUT_SIZE - 1].score);
+    let cutPos = CUT_SIZE;
     const madeCut = new Set();
     for (let i=0; i<sorted.length; i++) {
-      if (parseScore(sorted[i].score) <= p50Score) {
+      if (parseScore(sorted[i].score) <= cutLineScore) {
         cutPos = i+1;
         madeCut.add(sorted[i].id);
       }
@@ -1668,7 +1671,7 @@ function runOddsSimulation(espnData) {
     }).sort((a,b) => a.score - b.score);
     
     // Cut line: score of 50th player, everyone at that score or better makes it
-    const simCutScore = cutScores.length >= 50 ? cutScores[49].score : 999;
+    const simCutScore = cutScores.length >= CUT_SIZE ? cutScores[CUT_SIZE - 1].score : 999;
     const simCutMap = {};
     cutScores.forEach(c => { simCutMap[c.name] = c.score <= simCutScore + 0.01; });
     

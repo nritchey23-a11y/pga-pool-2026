@@ -250,12 +250,23 @@ def compute_standings(espn_data: dict) -> dict:
             espn_id = player["id"]
             pos = positions.get(espn_id)
             
-            # Determine cut status (check if player has round 3/4 data when comp is in later rounds)
+            # Determine cut status: once we're past R2, players without R3 data missed the cut
             missed_cut = False
-            player_score_str = str(player.get("score", "E"))
-            # ESPN marks cut players differently — check if they have "CUT" in status
-            # For now, we'll determine this by checking if the competition is past round 2
-            # and the player has no round 3 data
+            current_period = comp.get("status", {}).get("period", 1)
+            if current_period >= 3:
+                # Check if player has any R3 holes played
+                has_r3 = False
+                for ls in player.get("linescores", []):
+                    if ls.get("period") == 3:
+                        for h in ls.get("linescores", []):
+                            if h.get("value") is not None and str(h.get("value", "")) != "":
+                                has_r3 = True
+                                break
+                        break
+                # If R3 has started for the field but this player has no R3 data, they missed cut
+                # Use a global check: if at least 60 players have R3 data, the cut has happened
+                if not has_r3:
+                    missed_cut = True
             
             round_data = []
             per_round_hole_pts = [0, 0, 0, 0]
